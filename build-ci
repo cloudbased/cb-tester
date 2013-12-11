@@ -1,0 +1,36 @@
+export DISPLAY=:1
+Xvfb :1 &
+
+#
+# NodeJS is used by phantom JS and the "demo" web server
+# This is how you install it: 
+#
+curl -s -o use-node https://repository-cloudbees.forge.cloudbees.com/distributions/ci-addons/node/use-node
+NODE_VERSION=0.10.4 . ./use-node
+
+if [ ! -e $webspecter.tar.gz ]
+then
+    wget -nv https://s3.amazonaws.com/cloudbees-downloads/clickstart/webspecter.tar.gz
+    tar xf webspecter.tar.gz
+fi
+
+#
+# run the Browser tests tests - this requires a demo server running to test against!
+#
+cd $WORKSPACE/webapp
+npm install
+node main.js  &
+WEBAPP_PID=$!
+sleep 5
+
+
+# run integration tests with phantom.js and webspecter - in chrome.
+
+cd $WORKSPACE/tests
+npm install phantomjs
+PATH=$PATH:$WORKSPACE/webspecter/bin
+PATH=$PATH:node_modules/phantomjs/bin
+webspecter -R xunit integration.coffee > $WORKSPACE/test.out.xml
+
+# shut down the demo server, we are done now.
+kill -s TERM $WEBAPP_PID

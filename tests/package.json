@@ -1,4 +1,8 @@
 {
-  "name" : "barebones",
-  "version" : "0.0.1"
+  "name": "barebones",
+  "version": "0.0.1",
+  "devDependencies": {
+    "mocha": "~1.17.0",
+    "phantomjs": "~1.9.2-6"
+  }
 }
